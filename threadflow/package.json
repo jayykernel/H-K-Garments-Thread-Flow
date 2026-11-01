@@ -1,0 +1,16 @@
+{
+  "name": "threadflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ThreadFlow garment production management app",
+  "scripts": {
+    "dev": "npx vercel dev",
+    "check": "node --check \"api/[...path].js\""
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
+  }
+}
