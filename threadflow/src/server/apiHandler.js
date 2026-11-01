@@ -1,6 +1,6 @@
 const crypto = require('node:crypto');
 const { neon } = require('@neondatabase/serverless');
-const { createInitialDatabase } = require('../src/data/seedData');
+const { createInitialDatabase } = require('../data/seedData');
 
 const username = (process.env.ADMIN_USERNAME || 'kamalakannan').trim().toLowerCase();
 const password = process.env.ADMIN_PASSWORD || 'kamalhk';

@@ -5,7 +5,7 @@
   "description": "ThreadFlow garment production management app",
   "scripts": {
     "dev": "npx vercel dev",
-    "check": "node --check \"api/[...path].js\""
+    "check": "node --check src/server/apiHandler.js && node --check api/login.js && node --check api/session.js && node --check api/logout.js && node --check api/database.js"
   },
   "engines": {
     "node": ">=22.13"

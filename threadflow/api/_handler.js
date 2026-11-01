@@ -1,1 +1,1 @@
-module.exports = require('./[...path].js');
+module.exports = require('../src/server/apiHandler.js');
