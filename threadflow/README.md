@@ -1,6 +1,6 @@
 # ThreadFlow on Vercel
 
-ThreadFlow is a single-admin production tracking app. The static UI is served from `dist/threadflow.html`; `api/[...path].js` implements the `/api/session`, `/api/login`, `/api/logout`, and `/api/database` endpoints. Records and sessions are stored in Neon Postgres. No local SQLite file is used.
+ThreadFlow is a single-admin production tracking app. The static UI is served from `dist/threadflow.html`; `api/login.js`, `api/session.js`, `api/logout.js`, and `api/database.js` implement its Vercel endpoints. Records and sessions are stored in Neon Postgres. No local SQLite file is used.
 
 ## Deploy
 

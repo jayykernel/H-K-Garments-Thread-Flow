@@ -72,13 +72,11 @@ function cookieSecurity(req) {
   return /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(req.headers.host || '') ? '' : '; Secure';
 }
 
-module.exports = async function handler(req, res) {
+module.exports = async function handler(action, req, res) {
   try {
     if (!['GET', 'POST', 'PUT'].includes(req.method)) return json(res, 405, { error: 'Method not allowed.' }, { Allow: 'GET, POST, PUT' });
     if (req.method !== 'GET' && !checkSameOrigin(req)) return json(res, 403, { error: 'Request rejected.' });
     const sql = await database();
-    const action = String(req.query.path || '').replace(/\/$/, '');
-
     if (action === 'session' && req.method === 'GET') return json(res, 200, { user: await sessionUser(req, sql) });
 
     if (action === 'login' && req.method === 'POST') {

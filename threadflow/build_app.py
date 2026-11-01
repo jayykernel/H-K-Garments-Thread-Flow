@@ -1372,10 +1372,14 @@ __BROWSER_SEED_JS__
       let result;
       try {
         const response = await fetch('/api/login', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({username,password:pass}) });
-        result = await response.json();
+        const responseText = await response.text();
+        try { result = JSON.parse(responseText); }
+        catch (_) { throw new Error(`Server error (${response.status}). Check Vercel Function Logs and confirm DATABASE_URL and AUTH_SESSION_SECRET are set.`); }
         if (!response.ok) throw new Error(result.error || 'Sign in failed.');
         appState.currentUser = result.user;
-        appState.db = await fetch('/api/database').then(r => { if (!r.ok) throw new Error(); return r.json(); });
+        const dbResponse = await fetch('/api/database');
+        if (!dbResponse.ok) throw new Error('Signed in, but the database could not be loaded. Check the Vercel database configuration.');
+        appState.db = await dbResponse.json();
       } catch (error) {
         errBox.textContent = error.message || 'Unable to connect to the server.';
         errBox.classList.remove('hidden');
