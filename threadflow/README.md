@@ -10,7 +10,7 @@ ThreadFlow is a single-admin production tracking app. The static UI is served fr
 4. In Vercel Project → Settings → Environment Variables, add `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `AUTH_SESSION_SECRET` for Production (and Preview if needed). Use `kamalakannan` and `kamalhk` for the requested initial login. Generate a private random session secret of at least 32 characters.
 5. Redeploy after saving environment variables. Open the deployment URL, sign in, create a record, then sign out/in to confirm it persisted.
 
-The database tables and initial sample dataset are created automatically on first API use. Only the single `kamalakannan` administrator can sign in; there is no registration or role switching. The initial `kamalhk` password is weak for a public site, so replace it with a long unique password in Vercel before sharing the URL.
+Empty application tables are created automatically on first API use, so a new client starts with no sample records. Existing built-in demo records are removed on the first request after this update; any records added later are preserved. Only the single `kamalakannan` administrator can sign in; there is no registration or role switching. The initial `kamalhk` password is weak for a public site, so replace it with a long unique password in Vercel before sharing the URL.
 
 ## Local development
 

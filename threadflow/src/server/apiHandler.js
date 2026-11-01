@@ -40,11 +40,37 @@ async function database() {
   await sql`CREATE TABLE IF NOT EXISTS threadflow_state (id integer PRIMARY KEY CHECK (id = 1), data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`;
   await sql`CREATE TABLE IF NOT EXISTS threadflow_sessions (token_hash text PRIMARY KEY, expires_at timestamptz NOT NULL)`;
   await sql`CREATE TABLE IF NOT EXISTS threadflow_login_attempts (ip text PRIMARY KEY, count integer NOT NULL, window_started_at timestamptz NOT NULL)`;
-  const existing = await sql`SELECT 1 FROM threadflow_state WHERE id = 1`;
-  if (!existing.length) {
-    const seed = createInitialDatabase();
-    seed.users = [adminProfile()];
-    await sql`INSERT INTO threadflow_state (id, data) VALUES (1, ${JSON.stringify(seed)}::jsonb) ON CONFLICT (id) DO NOTHING`;
+  const rows = await sql`SELECT data FROM threadflow_state WHERE id = 1`;
+  if (!rows.length) {
+    const blank = {
+      version: '3.0.0', referenceDate: new Date().toISOString().slice(0, 10),
+      users: [adminProfile()], costingRecords: [], orders: [], tasks: [], auditLogs: [], demoDataPurged: true
+    };
+    await sql`INSERT INTO threadflow_state (id, data) VALUES (1, ${JSON.stringify(blank)}::jsonb) ON CONFLICT (id) DO NOTHING`;
+  } else if (!rows[0].data.demoDataPurged) {
+    // Remove only the built-in demonstration records. Preserve any records the
+    // customer may already have created, along with the admin's preferences.
+    const current = rows[0].data;
+    const demo = createInitialDatabase();
+    const ids = records => new Set((records || []).map(record => record.id).filter(Boolean));
+    const demoCostings = ids(demo.costingRecords);
+    const demoOrders = ids(demo.orders);
+    const demoTasks = ids(demo.tasks);
+    const demoAudit = ids(demo.auditLogs);
+    const demoEntities = new Set([...demoCostings, ...demoOrders, ...demoTasks]);
+    const clean = {
+      ...current,
+      version: '3.0.0',
+      users: [adminProfile(current.users?.[0] || {})],
+      costingRecords: (current.costingRecords || []).filter(record => !demoCostings.has(record.id)),
+      orders: (current.orders || []).filter(record => !demoOrders.has(record.id)),
+      tasks: (current.tasks || []).filter(record => !demoTasks.has(record.id)),
+      auditLogs: (current.auditLogs || []).filter(record =>
+        !demoAudit.has(record.id) && !demoEntities.has(record.entityId) && !demoOrders.has(record.orderId)
+      ),
+      demoDataPurged: true
+    };
+    await sql`UPDATE threadflow_state SET data = ${JSON.stringify(clean)}::jsonb, updated_at = now() WHERE id = 1`;
   }
   return sql;
 }

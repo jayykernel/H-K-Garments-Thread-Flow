@@ -1043,7 +1043,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     ⬇ Export Database Snapshot (JSON)
                   </button>
                   <button type="button" onclick="openResetDatabaseModal()" class="tf-btn-secondary px-3 py-2 rounded-lg text-xs font-medium" style="color: var(--status-danger-text);">
-                    ↺ Reset to Factory Seed Data
+                    ↺ Clear All Records
                   </button>
                 </div>
               </div>
@@ -4030,21 +4030,29 @@ __BROWSER_SEED_JS__
     function openResetDatabaseModal() {
       openModal({
         category: 'DATABASE RESET CONFIRMATION',
-        title: 'Reset ThreadFlow Database to Factory Seed State?',
+        title: 'Clear all ThreadFlow records?',
         bodyHtml: `
           <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
-            This will restore the sample costing records, manufacturing orders, and workflow tasks. Any custom changes will be replaced.
+            This permanently removes all costings, orders, tasks, and audit history from the database. The administrator account and profile preferences will remain.
           </p>
         `,
         footerHtml: `
           <button type="button" onclick="closeModal()" class="tf-btn-secondary px-4 py-2 rounded-lg text-xs font-medium">Cancel</button>
-          <button type="button" onclick="confirmResetDatabase()" class="tf-btn-primary px-4 py-2 rounded-lg text-xs font-medium">Confirm Factory Reset</button>
+          <button type="button" onclick="confirmResetDatabase()" class="tf-btn-primary px-4 py-2 rounded-lg text-xs font-medium">Clear All Records</button>
         `
       });
     }
 
     function confirmResetDatabase() {
-      appState.db = createInitialDatabase();
+      appState.db = {
+        ...appState.db,
+        version: '3.0.0',
+        costingRecords: [],
+        orders: [],
+        tasks: [],
+        auditLogs: [],
+        demoDataPurged: true
+      };
       appState.wizardState = {
         step: 1,
         editingCostingId: null,
@@ -4054,7 +4062,7 @@ __BROWSER_SEED_JS__
       safeStorageSet(WIZARD_STORAGE_KEY, appState.wizardState);
       closeModal();
       renderCurrentActiveView();
-      showToast('Database restored to factory seed records.', 'info');
+      showToast('All records have been cleared.', 'info');
     }
 
     function runInBrowserVerificationSuite(silent = false) {
